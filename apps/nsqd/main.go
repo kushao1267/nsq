@@ -72,7 +72,7 @@ func (p *program) Start() error {
 	if err != nil {
 		logFatal("failed to load metadata - %s", err)
 	}
-	err = p.nsqd.PersistMetadata()
+	err = p.nsqd.PersistMetadata() // 启动时也持久化一次(会更新Paused状态)
 	if err != nil {
 		logFatal("failed to persist metadata - %s", err)
 	}

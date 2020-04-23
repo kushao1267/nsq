@@ -20,6 +20,8 @@ func TCPServer(listener net.Listener, handler TCPHandler, logf lg.AppLogFunc) er
 	var wg sync.WaitGroup
 
 	for {
+		// 该Server一直监听着tcp端口，有client连接过来则开启一个goroutine去处理该连接，并wg.Wait()
+		// 如果Accept发生错误，则该TcpServer所在的goroutine让出时间片
 		clientConn, err := listener.Accept()
 		if err != nil {
 			if nerr, ok := err.(net.Error); ok && nerr.Temporary() {

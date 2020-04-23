@@ -244,7 +244,7 @@ func (n *NSQD) RemoveClient(clientID int64) {
 }
 
 func (n *NSQD) Main() error {
-	ctx := &context{n}
+	ctx := &context{n} // 这里主要是把NSQD放入上下文中，其实就是在底层的各个地方调用，比如打印日志 tcp.go中的p.ctx.nsqd.logf
 
 	exitCh := make(chan error)
 	var once sync.Once

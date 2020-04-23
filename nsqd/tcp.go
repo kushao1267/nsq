@@ -13,7 +13,7 @@ type tcpServer struct {
 	conns sync.Map
 }
 
-func (p *tcpServer) Handle(clientConn net.Conn) {
+func (p *tcpServer) Handle(clientConn net.Conn) { // 处理一个新连接（client）
 	p.ctx.nsqd.logf(LOG_INFO, "TCP: new client(%s)", clientConn.RemoteAddr())
 
 	// The client should initialize itself by sending a 4 byte sequence indicating
@@ -26,6 +26,7 @@ func (p *tcpServer) Handle(clientConn net.Conn) {
 		clientConn.Close()
 		return
 	}
+	// 读4bytes的协议字节magic, 商定client与server的消息协议
 	protocolMagic := string(buf)
 
 	p.ctx.nsqd.logf(LOG_INFO, "CLIENT(%s): desired protocol magic '%s'",
@@ -43,14 +44,14 @@ func (p *tcpServer) Handle(clientConn net.Conn) {
 		return
 	}
 
-	p.conns.Store(clientConn.RemoteAddr(), clientConn)
+	p.conns.Store(clientConn.RemoteAddr(), clientConn) // key是客户端ip地址，value是客户端tcp连接
 
-	err = prot.IOLoop(clientConn)
+	err = prot.IOLoop(clientConn) // 进行IO循环，接受客户端消息
 	if err != nil {
 		p.ctx.nsqd.logf(LOG_ERROR, "client(%s) - %s", clientConn.RemoteAddr(), err)
 	}
 
-	p.conns.Delete(clientConn.RemoteAddr())
+	p.conns.Delete(clientConn.RemoteAddr()) // 退出IOLoop后就不再接受消息，client删除、退出
 }
 
 func (p *tcpServer) CloseAll() {
